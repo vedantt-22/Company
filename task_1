@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense Splitter</title>
+
+  <style>
+    * { box-sizing: border-box; font-family: Segoe UI, Tahoma, Arial, sans-serif; }
+    body { margin: 16px; max-width: 900px; }
+    h1 { margin-bottom: 8px; }
+    .row { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px; }
+    label { display: block; font-size: 13px; }
+    input { padding: 6px; }
+    button { padding: 6px 10px; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    .err { color: red; font-size: 13px; }
+    .stats { display: flex; gap: 16px; margin-top: 12px; }
+    .statbox { border: 1px solid #ccc; padding: 8px; width: 50%; }
+  </style>
+</head>
+
+<body>
+
+<h1>Expense Splitter</h1>
+
+<div class="row">
+  <div>
+    <label>Person name</label>
+    <input id="inpName" type="text">
+  </div>
+  <div>
+    <label>Amount</label>
+    <input id="inpAmount" type="number" step="0.01">
+  </div>
+  <button id="btnAdd">Add</button>
+  <button id="btnClear">Clear all</button>
+</div>
+
+<div id="err" class="err"></div>
+
+<div class="stats">
+  <div class="statbox">
+    <h3>Summary</h3>
+    <div id="statCount">Count: 0</div>
+    <div id="statTotal">Total: 0.00</div>
+    <div id="statPeople">People: 0</div>
+    <div id="statSplit">Split each: 0.00</div>
+  </div>
+  <div class="statbox">
+    <h3>Per Person</h3>
+    <div id="perPerson"></div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Person</th>
+      <th>Amount</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<script>
+  // Parallel arrays ONLY
+  var people = ["Apple", "Orange", "Mango"];
+  var amounts = [120.5, 40, 75.25];
+
+  var inpName = document.getElementById("inpName");
+  var inpAmount = document.getElementById("inpAmount");
+  var err = document.getElementById("err");
+
+  document.getElementById("btnAdd").onclick = function () {
+    err.textContent = "";
+
+    var name = inpName.value.trim();
+    var amt = Number(inpAmount.value);
+
+    if (name.length < 2) {
+      err.textContent = "Name must be at least 2 characters";
+      return;
+    }
+    if (isNaN(amt) || amt <= 0) {
+      err.textContent = "Amount must be a number greater than 0";
+      return;
+    }
+
+    people.push(name);
+    amounts.push(amt);
+
+    inpName.value = "";
+    inpAmount.value = "";
+
+    render();
+  };
+
+  document.getElementById("btnClear").onclick = function () {
+    if (!confirm("Clear all expenses?")) return;
+    people = [];
+    amounts = [];
+    render();
+  };
+
+  function editRow(i) {
+    if (!confirm("Edit this entry?")) return;
+
+    var newName = prompt("Enter new name:", people[i]);
+    if (newName === null || newName.trim().length < 2) return;
+
+    var newAmt = prompt("Enter new amount:", amounts[i]);
+    newAmt = Number(newAmt);
+    if (isNaN(newAmt) || newAmt <= 0) return;
+
+    people[i] = newName.trim();
+    amounts[i] = newAmt;
+
+    render();
+  }
+
+  function deleteRow(i) {
+    if (!confirm("Delete this entry?")) return;
+    people.splice(i, 1);
+    amounts.splice(i, 1);
+    render();
+  }
+
+  function render() {
+    var tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+
+    var total = 0;
+    var unique = [];
+
+    for (var i = 0; i < people.length; i++) {
+      total += amounts[i];
+
+      if (unique.indexOf(people[i]) === -1) {
+        unique.push(people[i]);
+      }
+
+      var tr = document.createElement("tr");
+
+      tr.innerHTML =
+        "<td>" + (i + 1) + "</td>" +
+        "<td>" + people[i] + "</td>" +
+        "<td>" + amounts[i].toFixed(2) + "</td>" +
+        "<td>" +
+        "<button onclick='editRow(" + i + ")'>Edit</button> " +
+        "<button onclick='deleteRow(" + i + ")'>Delete</button>" +
+        "</td>";
+
+      tbody.appendChild(tr);
+    }
+
+    document.getElementById("statCount").textContent =
+      "Count: " + people.length;
+    document.getElementById("statTotal").textContent =
+      "Total: " + total.toFixed(2);
+    document.getElementById("statPeople").textContent =
+      "People: " + unique.length;
+    document.getElementById("statSplit").textContent =
+      "Split each: " + (unique.length ? (total / unique.length).toFixed(2) : "0.00");
+
+    var per = document.getElementById("perPerson");
+    per.innerHTML = "";
+
+    for (var u = 0; u < unique.length; u++) {
+      var sum = 0;
+      for (var j = 0; j < people.length; j++) {
+        if (people[j] === unique[u]) sum += amounts[j];
+      }
+      per.innerHTML += unique[u] + ": " + sum.toFixed(2) + "<br>";
+    }
+  }
+
+  render();
+</script>
+
+</body>
+</html>
