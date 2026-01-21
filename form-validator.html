@@ -154,3 +154,64 @@
 </script>
 </body>
 </html>
+
+
+
+<form id="demoForm">
+
+  <!-- Username -->
+  <label>Username</label>
+  <input type="text"
+         name="username"
+         data-required="true"
+         data-required-msg="Please enter a username"
+         data-minlength="3"
+         data-minlength-msg="Username must be at least 3 characters">
+
+  <!-- Email -->
+  <label>Email</label>
+  <input type="email"
+         name="email"
+         data-required="true"
+         data-required-msg="Please enter your email address"
+         data-pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+         data-pattern-msg="Please enter a valid email">
+
+  <!-- Age -->
+  <label>Age</label>
+  <input type="number"
+         name="age"
+         data-required="true"
+         data-min="18"
+         data-min-msg="Age must be at least 18"
+         data-max="100"
+         data-max-msg="Age cannot exceed 100">
+
+  <!-- Password -->
+  <label>Password</label>
+  <input type="password"
+         name="password"
+         data-required="true"
+         data-minlength="8"
+         data-minlength-msg="Password must be at least 8 characters"
+         data-maxlength="20"
+         data-maxlength-msg="Password cannot exceed 20 characters">
+
+  <!-- Phone (Optional, letters only if filled) -->
+  <label>Phone Number</label>
+  <input type="text"
+         name="phone"
+         data-pattern="^[A-Za-z]+$"
+         data-pattern-msg="Phone number must contain letters only">
+
+  <!-- Comments -->
+  <label>Comments</label>
+  <textarea name="comments"
+            data-maxlength="200"
+            data-maxlength-msg="Comments cannot exceed 200 characters">
+  </textarea>
+
+  <button type="submit">Submit Form</button>
+</form>
+
+<script src="form-validator.js"></script>
