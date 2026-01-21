@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Form</title>
+</head>
+<body>
+<style>
+  .error {
+  border: 2px solid red;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.success-message {
+  color: green;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+</style?
+<form>
+  <!-- Required field with minimum length -->
+  <input
+    type="text"
+    name="username"
+    data-required="true"
+    data-required-msg="Please enter a username"
+    data-minlength="3"
+    data-minlength-msg="Username must be at least 3 characters"
+  >
+
+  <!-- Number field with min and max -->
+  <input
+    type="number"
+    name="age"
+    data-required="true"
+    data-min="18"
+    data-min-msg="You must be 18 or older"
+    data-max="100"
+    data-max-msg="Age cannot exceed 100"
+  >
+
+  <!-- Optional field (skipped automatically) -->
+  <input type="text" name="middleName" placeholder="Middle name (optional)">
+
+  <!-- Field with only one validator -->
+  <textarea
+    name="comments"
+    data-maxlength="500"
+    data-maxlength-msg="Comments cannot exceed 500 characters">
+  </textarea>
+
+  <button type="submit">Submit</button>
+</form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("form");
+  if (!form) return;
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    clearErrors();
+
+    let isFormValid = true;
+    const fields = form.querySelectorAll("input, textarea");
+
+    fields.forEach(field => {
+      const value = field.value.trim();
+
+      /* ---------- REQUIRED ---------- */
+      if (field.dataset.required === "true" && value === "") {
+        showError(field, field.dataset.requiredMsg || "This field is required");
+        isFormValid = false;
+        return;
+      }
+
+      /* ---------- MIN LENGTH ---------- */
+      if (field.dataset.minlength && value.length < field.dataset.minlength) {
+        showError(field, field.dataset.minlengthMsg);
+        isFormValid = false;
+        return;
+      }
+
+      /* ---------- MAX LENGTH ---------- */
+      if (field.dataset.maxlength && value.length > field.dataset.maxlength) {
+        showError(field, field.dataset.maxlengthMsg);
+        isFormValid = false;
+        return;
+      }
+
+      /* ---------- MIN VALUE ---------- */
+      if (field.dataset.min && value !== "" && Number(value) < Number(field.dataset.min)) {
+        showError(field, field.dataset.minMsg);
+        isFormValid = false;
+        return;
+      }
+
+      /* ---------- MAX VALUE ---------- */
+      if (field.dataset.max && value !== "" && Number(value) > Number(field.dataset.max)) {
+        showError(field, field.dataset.maxMsg);
+        isFormValid = false;
+        return;
+      }
+
+      /* ---------- REGEX PATTERN ---------- */
+      if (field.dataset.pattern && value !== "") {
+        const regex = new RegExp(field.dataset.pattern);
+        if (!regex.test(value)) {
+          showError(field, field.dataset.patternMsg);
+          isFormValid = false;
+        }
+      }
+    });
+
+    /* ---------- SUCCESS ---------- */
+    if (isFormValid) {
+      showSuccessMessage(form);
+      form.reset();
+    }
+  });
+
+  /* ================= HELPER FUNCTIONS ================= */
+
+  function showError(field, message) {
+    field.classList.add("error");
+
+    const error = document.createElement("div");
+    error.className = "error-message";
+    error.innerText = message;
+
+    field.after(error);
+  }
+
+  function clearErrors() {
+    document.querySelectorAll(".error-message").forEach(el => el.remove());
+    document.querySelectorAll(".error").forEach(el => el.classList.remove("error"));
+    document.querySelectorAll(".success-message").forEach(el => el.remove());
+  }
+
+  function showSuccessMessage(form) {
+    const success = document.createElement("div");
+    success.className = "success-message";
+    success.innerText = "Form submitted successfully ✔";
+
+    form.appendChild(success);
+  }
+});
+</script>
+</body>
+</html>
