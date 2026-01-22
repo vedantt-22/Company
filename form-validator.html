@@ -1,217 +1,318 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>My Form</title>
-</head>
-<body>
-<style>
-  .error {
-  border: 2px solid red;
-}
-
-.error-message {
-  color: red;
-  font-size: 12px;
-  margin-bottom: 8px;
-}
-
-.success-message {
-  color: green;
-  margin-top: 15px;
-  font-weight: bold;
-}
-
-</style?
-<form>
-  <!-- Required field with minimum length -->
-  <input
-    type="text"
-    name="username"
-    data-required="true"
-    data-required-msg="Please enter a username"
-    data-minlength="3"
-    data-minlength-msg="Username must be at least 3 characters"
-  >
-
-  <!-- Number field with min and max -->
-  <input
-    type="number"
-    name="age"
-    data-required="true"
-    data-min="18"
-    data-min-msg="You must be 18 or older"
-    data-max="100"
-    data-max-msg="Age cannot exceed 100"
-  >
-
-  <!-- Optional field (skipped automatically) -->
-  <input type="text" name="middleName" placeholder="Middle name (optional)">
-
-  <!-- Field with only one validator -->
-  <textarea
-    name="comments"
-    data-maxlength="500"
-    data-maxlength-msg="Comments cannot exceed 500 characters">
-  </textarea>
-
-  <button type="submit">Submit</button>
-</form>
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector("form");
-  if (!form) return;
-
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
-    clearErrors();
-
-    let isFormValid = true;
-    const fields = form.querySelectorAll("input, textarea");
-
-    fields.forEach(field => {
-      const value = field.value.trim();
-
-      /* ---------- REQUIRED ---------- */
-      if (field.dataset.required === "true" && value === "") {
-        showError(field, field.dataset.requiredMsg || "This field is required");
-        isFormValid = false;
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <title>My Form</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <style>
+      /* ====== RESET & BASE ====== */
+      * {
+        box-sizing: border-box;
+        font-family: "Segoe UI", Roboto, Arial, sans-serif;
       }
 
-      /* ---------- MIN LENGTH ---------- */
-      if (field.dataset.minlength && value.length < field.dataset.minlength) {
-        showError(field, field.dataset.minlengthMsg);
-        isFormValid = false;
-        return;
+      body {
+        background: #f4f7fb;
+        padding: 40px 15px;
       }
 
-      /* ---------- MAX LENGTH ---------- */
-      if (field.dataset.maxlength && value.length > field.dataset.maxlength) {
-        showError(field, field.dataset.maxlengthMsg);
-        isFormValid = false;
-        return;
+      /* ====== FORM CONTAINER ====== */
+      form {
+        max-width: 420px;
+        margin: auto;
+        background: #ffffff;
+        padding: 25px 30px;
+        border-radius: 10px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
       }
 
-      /* ---------- MIN VALUE ---------- */
-      if (field.dataset.min && value !== "" && Number(value) < Number(field.dataset.min)) {
-        showError(field, field.dataset.minMsg);
-        isFormValid = false;
-        return;
+      /* ====== INPUTS & TEXTAREA ====== */
+      input,
+      textarea {
+        width: 100%;
+        padding: 12px 14px;
+        margin-bottom: 8px;
+        font-size: 14px;
+        border-radius: 6px;
+        border: 1.5px solid #d1d9e6;
+        background: #fff;
+        transition: all 0.25s ease;
       }
 
-      /* ---------- MAX VALUE ---------- */
-      if (field.dataset.max && value !== "" && Number(value) > Number(field.dataset.max)) {
-        showError(field, field.dataset.maxMsg);
-        isFormValid = false;
-        return;
+      textarea {
+        resize: vertical;
+        min-height: 90px;
       }
 
-      /* ---------- REGEX PATTERN ---------- */
-      if (field.dataset.pattern && value !== "") {
-        const regex = new RegExp(field.dataset.pattern);
-        if (!regex.test(value)) {
-          showError(field, field.dataset.patternMsg);
-          isFormValid = false;
+      /* ====== FOCUS STATE ====== */
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+      }
+
+      /* ====== ERROR STATE ====== */
+      input.error,
+      textarea.error {
+        border-color: #e11d48;
+        background: #fff5f7;
+      }
+
+      /* ====== ERROR MESSAGE ====== */
+      .error-message {
+        color: #e11d48;
+        font-size: 12px;
+        margin-bottom: 12px;
+        display: block;
+      }
+
+      /* ====== SUCCESS MESSAGE ====== */
+      .success-message {
+        margin-top: 15px;
+        padding: 12px;
+        text-align: center;
+        background: #ecfdf5;
+        color: #047857;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 6px;
+        border: 1px solid #34d399;
+      }
+
+      /* ====== BUTTON ====== */
+      button {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(79, 70, 229, 0.35);
+      }
+
+      button:active {
+        transform: scale(0.98);
+      }
+
+      /* ====== RESPONSIVE ====== */
+      @media (max-width: 480px) {
+        form {
+          padding: 20px;
         }
       }
-    });
+    </style>
+    <form id="demoForm">
+      <!-- Username -->
+      <label>Username</label>
+      <input
+        type="text"
+        name="username"
+        data-required="true"
+        data-required-msg="Please enter a username"
+        data-minlength="3"
+        data-minlength-msg="Username must be at least 3 characters"
+      />
+      <br />
 
-    /* ---------- SUCCESS ---------- */
-    if (isFormValid) {
-      showSuccessMessage(form);
-      form.reset();
-    }
-  });
+      <!-- Email -->
+      <label>Email</label>
+      <input
+        type="email"
+        name="email"
+        data-required="true"
+        data-required-msg="Please enter your email address"
+        data-pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+        data-pattern-msg="Please enter a valid email"
+      />
+      <br />
 
-  /* ================= HELPER FUNCTIONS ================= */
+      <!-- Age -->
+      <label>Age</label>
+      <input
+        type="number"
+        name="age"
+        data-required="true"
+        data-min="18"
+        data-min-msg="Age must be at least 18"
+        data-max="100"
+        data-max-msg="Age cannot exceed 100"
+      />
+      <br />
 
-  function showError(field, message) {
-    field.classList.add("error");
+      <!-- Password -->
+      <label>Password</label>
+      <input
+        type="password"
+        name="password"
+        data-required="true"
+        data-minlength="8"
+        data-minlength-msg="Password must be at least 8 characters"
+        data-maxlength="20"
+        data-maxlength-msg="Password cannot exceed 20 characters"
+      />
+      <br />
 
-    const error = document.createElement("div");
-    error.className = "error-message";
-    error.innerText = message;
+      <!-- Phone (Optional, numbers only if filled) -->
+      <label>Phone Number</label>
+      <input
+        type="text"
+        name="phone"
+        data-pattern="^[0-9]+$"
+        data-pattern-msg="Phone number must contain numbers only"
+      />
+      <br />
 
-    field.after(error);
-  }
+      <!-- Comments -->
+      <label>Comments</label>
+      <textarea
+        name="comments"
+        data-maxlength="200"
+        data-maxlength-msg="Comments cannot exceed 200 characters"
+      >
+      </textarea>
+      <br />
 
-  function clearErrors() {
-    document.querySelectorAll(".error-message").forEach(el => el.remove());
-    document.querySelectorAll(".error").forEach(el => el.classList.remove("error"));
-    document.querySelectorAll(".success-message").forEach(el => el.remove());
-  }
+      <button type="submit">Submit Form</button>
+    </form>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form");
+        if (!form) return;
 
-  function showSuccessMessage(form) {
-    const success = document.createElement("div");
-    success.className = "success-message";
-    success.innerText = "Form submitted successfully ✔";
+        const fields = form.querySelectorAll("input, textarea");
+        const debounceTimers = new Map();
 
-    form.appendChild(success);
-  }
-});
-</script>
-</body>
+        /* ================= DEBOUNCED LIVE VALIDATION ================= */
+        fields.forEach((field) => {
+          field.addEventListener("input", () => {
+            clearTimeout(debounceTimers.get(field));
+
+            debounceTimers.set(
+              field,
+              setTimeout(() => {
+                validateField(field);
+              }, 300),
+            );
+          });
+        });
+
+        /* ================= SUBMIT VALIDATION ================= */
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+          let isFormValid = true;
+
+          fields.forEach((field) => {
+            const valid = validateField(field);
+            if (!valid) isFormValid = false;
+          });
+
+          if (isFormValid) {
+            showSuccessMessage(form);
+            form.reset();
+          }
+        });
+
+        /* ================= FIELD VALIDATION ================= */
+        function validateField(field) {
+          clearError(field);
+          const value = field.value.trim();
+
+          // REQUIRED
+          if (field.dataset.required === "true" && value === "") {
+            showError(
+              field,
+              field.dataset.requiredMsg || "This field is required",
+            );
+            return false;
+          }
+
+          // MIN LENGTH
+          if (value.length < field.dataset.minlength) {
+            showError(field, field.dataset.minlengthMsg);
+            return false;
+          }
+
+          // MAX LENGTH
+          if (value.length > field.dataset.maxlength) {
+            showError(field, field.dataset.maxlengthMsg);
+            return false;
+          }
+
+          // MIN VALUE
+          if (value !== "" && Number(value) < Number(field.dataset.min)) {
+            showError(field, field.dataset.minMsg);
+            return false;
+          }
+
+          // MAX VALUE
+          if (value !== "" && Number(value) > Number(field.dataset.max)) {
+            showError(field, field.dataset.maxMsg);
+            return false;
+          }
+
+          // REGEX PATTERN
+          if (field.dataset.pattern && value !== "") {
+            const regex = new RegExp(field.dataset.pattern);
+            if (!regex.test(value)) {
+              showError(field, field.dataset.patternMsg);
+              return false;
+            }
+          }
+
+          return true;
+        }
+
+        /* ================= UI HELPERS ================= */
+        function showError(field, message) {
+          field.classList.add("error");
+
+          if (field.nextElementSibling?.classList.contains("error-message"))
+            return;
+
+          const error = document.createElement("div");
+          error.className = "error-message";
+          error.innerText = message;
+
+          field.after(error);
+        }
+
+        function clearError(field) {
+          field.classList.remove("error");
+
+          if (field.nextElementSibling?.classList.contains("error-message")) {
+            field.nextElementSibling.remove();
+          }
+        }
+
+        function showSuccessMessage(form) {
+          removeSuccessMessage();
+
+          const success = document.createElement("div");
+          success.className = "success-message";
+          success.innerText = "Form submitted successfully ✔";
+
+          form.appendChild(success);
+        }
+
+        function removeSuccessMessage() {
+          document
+            .querySelectorAll(".success-message")
+            .forEach((el) => el.remove());
+        }
+      });
+    </script>
+  </body>
 </html>
-
-
-
-<form id="demoForm">
-
-  <!-- Username -->
-  <label>Username</label>
-  <input type="text"
-         name="username"
-         data-required="true"
-         data-required-msg="Please enter a username"
-         data-minlength="3"
-         data-minlength-msg="Username must be at least 3 characters">
-
-  <!-- Email -->
-  <label>Email</label>
-  <input type="email"
-         name="email"
-         data-required="true"
-         data-required-msg="Please enter your email address"
-         data-pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
-         data-pattern-msg="Please enter a valid email">
-
-  <!-- Age -->
-  <label>Age</label>
-  <input type="number"
-         name="age"
-         data-required="true"
-         data-min="18"
-         data-min-msg="Age must be at least 18"
-         data-max="100"
-         data-max-msg="Age cannot exceed 100">
-
-  <!-- Password -->
-  <label>Password</label>
-  <input type="password"
-         name="password"
-         data-required="true"
-         data-minlength="8"
-         data-minlength-msg="Password must be at least 8 characters"
-         data-maxlength="20"
-         data-maxlength-msg="Password cannot exceed 20 characters">
-
-  <!-- Phone (Optional, letters only if filled) -->
-  <label>Phone Number</label>
-  <input type="text"
-         name="phone"
-         data-pattern="^[A-Za-z]+$"
-         data-pattern-msg="Phone number must contain letters only">
-
-  <!-- Comments -->
-  <label>Comments</label>
-  <textarea name="comments"
-            data-maxlength="200"
-            data-maxlength-msg="Comments cannot exceed 200 characters">
-  </textarea>
-
-  <button type="submit">Submit Form</button>
-</form>
-
-<script src="form-validator.js"></script>
