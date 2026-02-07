@@ -1,50 +1,49 @@
-// ... existing imports
-import { ClassStats } from '../models/student.model';
+<div class="class-stats-container">
+      <div class="stat-card total">
+        <span class="label">Total Students</span>
+        <span class="value">{{ stats.totalStudents }}</span>
+      </div>
 
-// Inside StudentService class...
+      <div class="stat-card average">
+        <span class="label">Class Average</span>
+        <span class="value">{{ stats.classAverage | number:'1.1-1' }}%</span>
+      </div>
 
-  getClassStats(): ClassStats {
-    const students = this.students;
-    const totalStudents = students.length;
+      <div class="stat-card high">
+        <span class="label">Top Performer</span>
+        <span class="value highlight green">{{ stats.highestPerformer }}</span>
+      </div>
 
-    if (totalStudents === 0) {
-      return { totalStudents: 0, classAverage: 0, highestPerformer: 'N/A', lowestPerformer: 'N/A' };
+      <div class="stat-card low">
+        <span class="label">Needs Support</span>
+        <span class="value highlight red">{{ stats.lowestPerformer }}</span>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .class-stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
     }
+    .stat-card {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border-left: 4px solid #ddd;
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-card.total { border-left-color: #007bff; }
+    .stat-card.average { border-left-color: #6610f2; }
+    .stat-card.high { border-left-color: #28a745; }
+    .stat-card.low { border-left-color: #dc3545; }
 
-    let totalClassScore = 0;
-    let highestAvg = -1;
-    let lowestAvg = 101;
-    let highestName = 'N/A';
-    let lowestName = 'N/A';
-    let studentsWithGrades = 0;
-
-    students.forEach(student => {
-      if (student.grades && student.grades.length > 0) {
-        // Calculate individual student average
-        const sum = student.grades.reduce((a, b) => a + b.score, 0);
-        const avg = sum / student.grades.length;
-        
-        totalClassScore += avg;
-        studentsWithGrades++;
-
-        // Check High/Low
-        if (avg > highestAvg) {
-          highestAvg = avg;
-          highestName = student.name;
-        }
-        if (avg < lowestAvg) {
-          lowestAvg = avg;
-          lowestName = student.name;
-        }
-      }
-    });
-
-    const classAverage = studentsWithGrades > 0 ? (totalClassScore / studentsWithGrades) : 0;
-
-    return {
-      totalStudents,
-      classAverage,
-      highestPerformer: studentsWithGrades > 0 ? `${highestName} (${highestAvg.toFixed(1)}%)` : 'N/A',
-      lowestPerformer: studentsWithGrades > 0 ? `${lowestName} (${lowestAvg.toFixed(1)}%)` : 'N/A'
-    };
-  }
+    .label { font-size: 0.85rem; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; }
+    .value { font-size: 1.25rem; font-weight: bold; color: #212529; margin-top: 5px; }
+    .highlight.green { color: #28a745; }
+    .highlight.red { color: #dc3545; }
+  `]
+})
