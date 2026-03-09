@@ -1,0 +1,119 @@
+Create a **professional ER (Entity-Relationship) Diagram** for a **Hospital & Clinic Management System database implemented in SQL Server**.
+
+The ER diagram must clearly show **entities, attributes, primary keys, foreign keys, and relationships with cardinality (1:1, 1:N, M:N)**.
+
+### Entities and Attributes
+
+**Departments**
+
+* DepartmentID (PK)
+* DepartmentName
+
+**Doctors**
+
+* DoctorID (PK)
+* DoctorName
+* DepartmentID (FK → Departments.DepartmentID)
+* Specialization
+* ConsultationFee
+* IsActive
+
+**Insurance**
+
+* InsuranceID (PK)
+* ProviderName
+* CoveragePercent
+* YearlyLimit
+
+**Patients**
+
+* PatientID (PK)
+* PatientName
+* DateOfBirth
+* Phone
+* Address
+* InsuranceID (FK → Insurance.InsuranceID)
+
+**Appointments**
+
+* AppointmentID (PK)
+* PatientID (FK → Patients.PatientID)
+* DoctorID (FK → Doctors.DoctorID)
+* AppointmentDate
+* AppointmentTime
+* Status
+
+**MedicalRecords**
+
+* RecordID (PK)
+* AppointmentID (FK → Appointments.AppointmentID)
+* Diagnosis
+* TreatmentPlan
+* RequiresFollowUp
+
+**Medicines**
+
+* MedicineID (PK)
+* MedicineName
+* Price
+
+**Prescriptions**
+
+* PrescriptionID (PK)
+* RecordID (FK → MedicalRecords.RecordID)
+* MedicineID (FK → Medicines.MedicineID)
+* Dosage
+* DurationDays
+* Quantity
+
+**LabTests**
+
+* TestID (PK)
+* TestName
+* Cost
+
+**LabOrders**
+
+* LabOrderID (PK)
+* AppointmentID (FK → Appointments.AppointmentID)
+* TestID (FK → LabTests.TestID)
+* Result
+* IsAbnormal
+
+**Billing**
+
+* BillID (PK)
+* AppointmentID (FK → Appointments.AppointmentID)
+* ConsultationFee
+* MedicineCost
+* LabCost
+* InsuranceDiscount
+* GST
+* FinalAmount
+* PaymentStatus
+
+### Relationships
+
+1. One **Department** has many **Doctors** (1:N).
+2. One **Doctor** belongs to one **Department**.
+3. One **Patient** can have many **Appointments** (1:N).
+4. One **Doctor** can have many **Appointments** (1:N).
+5. One **Appointment** generates one **Medical Record** (1:1).
+6. One **Medical Record** can have many **Prescriptions** (1:N).
+7. One **Medicine** can appear in many **Prescriptions** (1:N).
+8. One **Appointment** can have many **Lab Orders** (1:N).
+9. One **Lab Test** can be used in many **Lab Orders** (1:N).
+10. One **Appointment** generates one **Billing record** (1:1).
+11. One **Insurance** policy can cover many **Patients** (1:N).
+
+### Diagram Requirements
+
+The ER diagram should:
+
+* Use **crow’s foot notation**
+* Clearly mark **Primary Keys and Foreign Keys**
+* Display **cardinality and relationship labels**
+* Be structured cleanly for **academic submission**
+* Group entities logically (Hospital, Patients, Billing, Labs)
+
+Generate the diagram in a **clean visual layout suitable for a university database project submission**.
