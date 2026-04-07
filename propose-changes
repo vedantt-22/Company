@@ -1,0 +1,10 @@
+QueryBuilder
+It is used for writing dynamic SQL queries rather tha normal SQL strings.
+It prevents SQL Injection which is writing malicious code in SQL.
+Better readability (for complex queries) Joins Subqueries Aggregations.
+Database abstraction - Works across PostgreSQL, MySQL, etc.
+
+SQL Injection = injecting malicious SQL via user input
+Prevent using:
+Parameterized queries
+ORM / QueryBuilder
