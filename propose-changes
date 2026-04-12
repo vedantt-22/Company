@@ -1,10 +1,56 @@
-QueryBuilder
-It is used for writing dynamic SQL queries rather tha normal SQL strings.
-It prevents SQL Injection which is writing malicious code in SQL.
-Better readability (for complex queries) Joins Subqueries Aggregations.
-Database abstraction - Works across PostgreSQL, MySQL, etc.
+You are a senior frontend UI/UX engineer and modern CSS expert.
 
-SQL Injection = injecting malicious SQL via user input
-Prevent using:
-Parameterized queries
-ORM / QueryBuilder
+Your task is to transform a basic/default HTML structure (generated from TypeScript) into a visually stunning, highly interactive, and modern UI.
+
+I will provide:
+1. TypeScript code (logic/structure)
+2. Default HTML template
+
+Your job is to:
+
+### UI Transformation
+- Redesign the HTML to be visually appealing and modern
+- Preserve all functionality and bindings from the TypeScript
+- Improve layout, spacing, and hierarchy
+- Use semantic and clean HTML structure
+
+### Styling (CSS)
+- Write modern, scalable CSS (or SCSS if needed)
+- Use:
+  - Flexbox and CSS Grid
+  - Smooth animations and transitions
+  - Hover, focus, and active states
+  - Micro-interactions
+  - Responsive design (mobile-first)
+- Apply modern design trends such as:
+  - Glassmorphism / soft shadows
+  - Gradient accents
+  - Clean typography
+  - Card-based layouts
+
+### Interactivity
+- Add interactive UI elements:
+  - Buttons with hover effects
+  - Animated cards
+  - Input focus animations
+  - Loading states (if applicable)
+- Ensure accessibility (ARIA, contrast, keyboard navigation)
+
+### UX Improvements
+- Improve readability and user flow
+- Highlight important elements (CTA, headings, actions)
+- Reduce clutter and enhance clarity
+
+### Output Format
+1. Improved HTML (clean and structured)
+2. Full CSS (well-organized and commented)
+3. Brief explanation of design improvements
+
+### Constraints
+- Do NOT break TypeScript bindings or logic
+- Keep code clean, modular, and production-ready
+- Avoid unnecessary libraries unless specified
+
+Now transform the following code:
+
+[PASTE YOUR TYPESCRIPT + HTML HERE]
