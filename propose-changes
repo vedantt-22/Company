@@ -501,3 +501,242 @@ async function runSeeds(): Promise<void> {
 }
 
 runSeeds();
+
+
+
+
+New Product.seed
+
+import { AppDataSource } from "../data-source";
+import { Product } from "../entities/Product";
+import { SubCategory } from "../entities/SubCategory";
+import fs from "fs";
+import path from "path";
+
+type CsvProductRow = {
+  name: string;
+  description: string;
+  price: string;
+  stock: string;
+  imagePath: string;
+  subCategoryId?: string;
+  subCategoryName?: string;
+};
+
+const PRODUCTS_CSV_PATH = path.resolve(
+  __dirname,
+  "../../../frontend/src/data/cleaned_products.csv"
+);
+
+const PRODUCTS_CSV_PATH_FURNITURE = path.resolve(
+  __dirname,
+  "../../../frontend/src/data/cleaned_furniture.csv"
+);
+
+function parseCsvLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+
+    if (char === '"') {
+      const nextChar = line[i + 1];
+      if (inQuotes && nextChar === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === "," && !inQuotes) {
+      result.push(current);
+      current = "";
+      continue;
+    }
+
+    current += char;
+  }
+
+  result.push(current);
+  return result.map((value) => value.trim());
+}
+
+function loadCsvRows(csvPath: string): CsvProductRow[] {
+  if (!fs.existsSync(csvPath)) {
+    console.warn(`Warning: Products CSV not found at: ${csvPath}. Skipping.`);
+    return [];
+  }
+
+  const csvContent = fs.readFileSync(csvPath, "utf-8");
+  const lines = csvContent
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  if (lines.length <= 1) {
+    return [];
+  }
+
+  const headers = parseCsvLine(lines[0]);
+  const requiredHeaders = [
+    "name",
+    "description",
+    "price",
+    "stock",
+    "imagePath",
+  ];
+
+  for (const header of requiredHeaders) {
+    if (!headers.includes(header)) {
+      throw new Error(`Missing required CSV header: ${header} in ${csvPath}`);
+    }
+  }
+
+  const hasSubCategoryId = headers.includes("subCategoryId");
+  const hasSubCategoryName = headers.includes("subCategoryName");
+  if (!hasSubCategoryId && !hasSubCategoryName) {
+    throw new Error(
+      `CSV ${csvPath} must include either subCategoryName (preferred) or subCategoryId.`
+    );
+  }
+
+  const rows: CsvProductRow[] = [];
+  for (const line of lines.slice(1)) {
+    const columns = parseCsvLine(line);
+    if (columns.length !== headers.length) {
+      continue;
+    }
+
+    const rowData: Record<string, string> = {};
+    headers.forEach((header, index) => {
+      rowData[header] = columns[index] ?? "";
+    });
+
+    rows.push({
+      name: rowData.name,
+      description: rowData.description,
+      price: rowData.price,
+      stock: rowData.stock,
+      imagePath: rowData.imagePath,
+      subCategoryId: rowData.subCategoryId,
+      subCategoryName: rowData.subCategoryName,
+    });
+  }
+
+  return rows;
+}
+
+export async function seedProducts(): Promise<void> {
+  const productRepo = AppDataSource.getRepository(Product);
+  const subRepo = AppDataSource.getRepository(SubCategory);
+
+  let allCsvRows: CsvProductRow[] = [];
+  allCsvRows = allCsvRows.concat(loadCsvRows(PRODUCTS_CSV_PATH));
+  allCsvRows = allCsvRows.concat(loadCsvRows(PRODUCTS_CSV_PATH_FURNITURE));
+  
+  if (allCsvRows.length === 0) {
+    console.log("  No product CSVs found or all are empty, skipping.");
+    return;
+  }
+
+  const subCategories = await subRepo.find();
+  const subCategoryById = new Map<number, SubCategory>(
+    subCategories.map((subCategory) => [subCategory.id, subCategory])
+  );
+  const subCategoryByName = new Map<string, SubCategory>(
+    subCategories.map((subCategory) => [subCategory.name.trim().toLowerCase(), subCategory])
+  );
+  const fallbackSubCategory = subCategories[0] ?? null;
+
+  const existingRows = await productRepo
+    .createQueryBuilder("product")
+    .select("product.name", "name")
+    .addSelect("product.imagePath", "imagePath")
+    .addSelect("product.subCategoryId", "subCategoryId")
+    .getRawMany<{ name: string; imagePath: string | null; subCategoryId: number }>();
+
+  const productKey = (name: string, imagePath: string | null, subCategoryId: number): string => {
+    return `${name.trim().toLowerCase()}::${(imagePath ?? "").trim()}::${subCategoryId}`;
+  };
+
+  const seenProductKeys = new Set<string>(
+    existingRows.map((row) => productKey(row.name, row.imagePath, Number(row.subCategoryId)))
+  );
+
+  const productsToInsert: Product[] = [];
+  let skippedRows = 0;
+  let remappedRows = 0;
+
+  for (const row of allCsvRows) {
+    const price = Number(row.price);
+    const stock = Number(row.stock);
+
+    if (!row.name || !row.description || Number.isNaN(price) || Number.isNaN(stock)) {
+      skippedRows += 1;
+      continue;
+    }
+
+    let subCategory: SubCategory | undefined;
+    const normalizedSubCategoryName = (row.subCategoryName ?? "").trim().toLowerCase();
+    if (normalizedSubCategoryName) {
+      subCategory = subCategoryByName.get(normalizedSubCategoryName);
+    }
+
+    if (!subCategory) {
+      const subCategoryId = Number(row.subCategoryId);
+      if (!Number.isNaN(subCategoryId)) {
+        subCategory = subCategoryById.get(subCategoryId);
+      }
+    }
+
+    if (!subCategory && fallbackSubCategory) {
+      subCategory = fallbackSubCategory;
+      remappedRows += 1;
+    }
+
+    if (!subCategory) {
+      skippedRows += 1;
+      continue;
+    }
+
+    const uniqueKey = productKey(row.name, row.imagePath || null, subCategory.id);
+    if (seenProductKeys.has(uniqueKey)) {
+      skippedRows += 1;
+      continue;
+    }
+
+    seenProductKeys.add(uniqueKey);
+
+    productsToInsert.push(
+      productRepo.create({
+        name: row.name,
+        description: row.description,
+        price,
+        stock,
+        imagePath: row.imagePath || null,
+        subCategory,
+      })
+    );
+  }
+
+  if (productsToInsert.length === 0) {
+    console.log("  No new products inserted from CSV (all rows were invalid or already present).");
+    return;
+  }
+
+  await productRepo.save(productsToInsert);
+
+  console.log(`  ${productsToInsert.length} products created from CSVs.`);
+  if (skippedRows > 0) {
+    console.log(`  ${skippedRows} CSV row(s) skipped due to invalid data.`);
+  }
+  if (remappedRows > 0) {
+    console.log(
+      `  ${remappedRows} CSV row(s) used fallback subCategory ${fallbackSubCategory?.name} (id=${fallbackSubCategory?.id}).`
+    );
+  }
+}
