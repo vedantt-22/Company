@@ -54,3 +54,87 @@ Your job is to:
 Now transform the following code:
 
 [PASTE YOUR TYPESCRIPT + HTML HERE]
+
+
+
+
+import { createConnection } from "typeorm";
+import { Product } from "./src/entity/Product"; // Adjust path as needed
+import { SubCategory } from "./src/entity/SubCategory"; // Adjust path as needed
+import * as csv from "csv-parser";
+import * as fs from "fs";
+
+const seed = async () => {
+  try {
+    const connection = await createConnection(); // Ensure your ormconfig.json or typeorm config is set up
+
+    console.log("Connected to database. Seeding data...");
+
+    // Clear existing data (optional, useful for clean re-seeding)
+    await connection.manager.query('DELETE FROM products;');
+    await connection.manager.query('DELETE FROM sub_category;'); // Adjust table name if different
+    console.log("Cleared existing product and sub_category data.");
+
+    // 1. Create and Save SubCategories
+    // Assuming you have a 'type' entity as parent of 'SubCategory' if needed.
+    // For this seed, we'll directly create the SubCategories based on the mapping.
+    const subCategoriesData = [
+      { id: 1, name: "Mobile", category: "Electronics" },
+      { id: 2, name: "Laptop", category: "Electronics" },
+      { id: 3, name: "Earphone", category: "Electronics" },
+    ];
+
+    const subCategoryEntities = subCategoriesData.map((data) => {
+      const subCategory = new SubCategory();
+      subCategory.id = data.id;
+      subCategory.name = data.name;
+      // If you have a 'type' entity for 'Electronics', you would link it here
+      // subCategory.type = <reference_to_electronics_type_entity>;
+      return subCategory;
+    });
+    await connection.manager.save(subCategoryEntities);
+    console.log("SubCategories seeded.");
+
+    // Map subCategory IDs to their entities for easy lookup
+    const subCategoryMap = new Map<number, SubCategory>();
+    subCategoryEntities.forEach(sc => subCategoryMap.set(sc.id, sc));
+
+    // 2. Read CSV and Seed Products
+    const products: Product[] = [];
+
+    fs.createReadStream('cleaned_products.csv') // Make sure this path is correct relative to where you run the script
+      .pipe(csv())
+      .on('data', (row) => {
+        const product = new Product();
+        product.name = row.name;
+        product.description = row.description;
+        product.price = parseFloat(row.price);
+        product.stock = parseInt(row.stock, 10);
+        product.imagePath = row.imagePath || null;
+        
+        const subCategoryId = parseInt(row.subCategoryId, 10);
+        if (isNaN(subCategoryId) || !subCategoryMap.has(subCategoryId)) {
+            console.warn(`Skipping product '${row.name}' due to invalid subCategoryId: ${row.subCategoryId}`);
+            return;
+        }
+        product.subCategory = subCategoryMap.get(subCategoryId)!; // Link to the SubCategory entity
+        
+        products.push(product);
+      })
+      .on('end', async () => {
+        console.log(`Read ${products.length} products from CSV. Saving...`);
+        await connection.manager.save(products);
+        console.log("Products seeded successfully!");
+        await connection.close();
+      })
+      .on('error', (error) => {
+        console.error("Error reading CSV:", error);
+        connection.close();
+      });
+
+  } catch (error) {
+    console.error("Error during seeding:", error);
+  }
+};
+
+seed();
