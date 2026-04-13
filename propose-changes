@@ -29,6 +29,84 @@ Concise explanation of design decisions
 Target a final result comparable to top-tier SaaS interfaces (Stripe, Linear, Vercel)—sleek, immersive, gradient-driven, glassmorphic, and highly interactive with precise attention to detail.
 
 
+
+
+
+You are a senior frontend engineer and UI design system expert specializing in ecommerce applications.
+
+I have an existing CSS codebase for an ecommerce app where sizing is inconsistent. Headers, product sections, buttons, and layout spacing do not follow a unified standard.
+
+Your task is to audit and fix inconsistencies WITHOUT redesigning the UI.
+
+---
+
+OBJECTIVES:
+
+1. Identify inconsistencies in:
+   - Typography (h1–h6, product titles, prices, labels)
+   - Spacing (margin, padding, gaps between sections)
+   - Component sizing (cards, buttons, images, containers)
+
+2. Enforce a consistent sizing system tailored for ecommerce UI:
+
+   TYPOGRAPHY SCALE (use rem units):
+   - h1: 2rem
+   - h2: 1.5rem
+   - h3: 1.25rem
+   - h4: 1.125rem
+   - body: 1rem
+   - small text: 0.875rem
+
+   SPACING SYSTEM (8px scale):
+   - 0.5rem (8px)
+   - 1rem (16px)
+   - 1.5rem (24px)
+   - 2rem (32px)
+   - 3rem (48px)
+
+   COMPONENT STANDARDS:
+   - Buttons: consistent height (e.g., 40–48px), padding, and font size
+   - Product cards: consistent padding and image ratios
+   - Sections: uniform vertical spacing
+   - Containers: max-width with consistent horizontal padding
+
+3. Refactor the CSS to:
+   - Normalize all headings and text styles
+   - Apply consistent spacing across all sections
+   - Align product grids and UI components properly
+   - Ensure responsiveness (mobile-first preferred)
+
+4. Maintain:
+   - Existing class names (unless absolutely necessary)
+   - Visual design intent (do NOT redesign, only standardize)
+
+---
+
+OUTPUT FORMAT:
+
+1. Clean, refactored CSS
+2. A short summary of:
+   - What inconsistencies were fixed
+   - The sizing system applied
+3. Optional improvements specific to ecommerce UX (e.g., better product card spacing, CTA clarity)
+
+---
+
+IMPORTANT RULES:
+- Use rem units instead of px wherever possible
+- Avoid arbitrary values; stick to the defined scale
+- Ensure consistency across all similar elements
+- Keep the code clean, modular, and maintainable
+
+---
+
+Here is my CSS:
+[PASTE YOUR CSS HERE]
+
+
+
+
+
 import { createConnection } from "typeorm";
 import { Product } from "./src/entity/Product"; // Adjust path as needed
 import { SubCategory } from "./src/entity/SubCategory"; // Adjust path as needed
