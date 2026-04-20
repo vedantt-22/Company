@@ -1,6 +1,6 @@
 Act as a principal frontend engineer and product-level UI designer. Transform the provided HTML (generated from TypeScript) into a high-end, production-quality interface that meets modern SaaS design standards. Do not modify or break any TypeScript bindings, IDs, classes, or event hooks—functional integrity is non-negotiable.
 https://claude.ai/share/c4477ecf-5a20-4519-9b98-12c2441b10d5
-
+https://docs.google.com/document/d/1ihgCl4aFuZleYJR_lbaC-h3973zHxptO9-oCrudTIA0/edit?usp=sharing
 https://claude.ai/share/20655c94-460b-40af-bcb4-338a42c95163
 Re-architect the markup into semantic, accessible, and scalable HTML, improving layout clarity, spacing rhythm, and visual hierarchy. Use CSS Grid for page structure and Flexbox for component composition, and organize the UI into a modular, card-driven system with consistent spacing and alignment.
 
